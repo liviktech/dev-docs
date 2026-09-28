@@ -1,20 +1,20 @@
 <!--
-TEMPLATE for a PR description. This one template works for every repo.
-Copy it into the task folder and rename it per repo as PR-<short repo name>.md, where the short name is usually the repo's folder name. Make one PR file per repo that changed. See INSTRUCTIONS.md for the naming and when to make more than one.
+TEMPLATE for a single PR description covering all repositories touched by a task (e.g. frontend and backend).
+Copy it into the task folder as PR.md. See INSTRUCTIONS.md for the rules.
 Fill in every <placeholder>. Keep sections even if the answer is short. If a section truly does not apply, write "None." instead of deleting it.
 Delete all of these comment blocks before you finish. The final file should have no comments left.
 Keep the writing simple and plain. Say what is true. If you checked something live, say so. If you did not check it, say so. Do not oversell.
-Do not commit or push. This file is just written to disk. The user opens the PR. Leave PR links as <...> for the user to fill in.
+Do not commit or push. This file is just written to disk for the user to copy into their PR description.
 -->
 
-# <YYYY-MM-DD> - <short-slug> (<repo side, for example backend or storefront>)
+# <YYYY-MM-DD> - <short-slug>
 
-<!-- COMPANION PR block. Only keep this if the task changes both repos. If it only changes one repo, delete this block. Say which PR is the other one, what it does in one line, and which must merge first and why. -->
-**Companion PR**: `<other repo name>` - `<other PR link>` (<one line on what the other side does>). <Which one merges first and what breaks if the order is wrong.>
+<!-- COMPANION PR block. Only keep this if there is an external PR dependency outside this task. Otherwise delete this line. -->
+**Companion PR**: `<external repo name>` - `<PR link>` (<one line on what the external PR does>). <Which one merges first and what breaks if the order is wrong.>
 
 ## Summary
 
-<!-- A few plain sentences. What was missing or broken before. What this PR changes. Which case had to keep working, and whether you checked it live or just assumed it. -->
+<!-- A few plain sentences. What was missing or broken before. What this PR changes across frontend/backend. Which case had to keep working, and whether you checked it live or just assumed it. -->
 <summary>
 
 <!-- If something is left out on purpose, say it here in bold. Delete this line if nothing is left out. -->
@@ -22,11 +22,21 @@ Do not commit or push. This file is just written to disk. The user opens the PR.
 
 ## What changed
 
-<!-- One row per file or group of files. Mark new files as (new) and renamed files as (renamed). If a file was only touched for comments or a rename with no real change, say "no real change" so the reviewer knows not to worry about it. -->
+<!-- Group file changes by repository (for example Frontend and Backend). Mark new files as (new) and renamed files as (renamed). If a file was only touched for comments or a rename with no real change, say "no real change". -->
+
+### <Frontend Repo Name>
 | File | Change |
 |---|---|
 | `<path>` | <what changed and why> |
 | `<path>` (new) | <what it is> |
+| `<path>` | no real change |
+
+### <Backend Repo Name>
+| File | Change |
+|---|---|
+| `<path>` | <what changed and why> |
+| `<path>` (new) | <what it is> |
+| `<path>` | no real change |
 
 ## Why
 
