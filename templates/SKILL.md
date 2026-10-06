@@ -28,9 +28,7 @@ Use this skill whenever asked to generate PR documentation, create PR md files, 
 - **No Em Dashes**: Never use em dashes anywhere. Use a comma, a period, or brackets instead.
 - **No Hard Wrapping**: Keep each paragraph on a single line. Let the editor handle wrapping.
 - **No Template Comments**: Delete all HTML comment blocks (`<!-- ... -->`) from the generated PR files.
-- **Omit Empty Sections**: If a section has no points or content (e.g. Companion PR, Decisions made, Bugs found while testing, Notes, Next steps), omit the entire section from the final file instead of writing "None." or leaving blank headers.
-- **PR Link Placeholders**: Keep PR link placeholders as `<... PR link>` for the user to replace when opening the PRs.
-- **Companion PRs**: When multiple repositories change, each `PR-<repo>.md` file MUST begin with a Companion PR block referencing the other repository's PR, explaining what the other side does, which merges first, and the risk if merged out of order. Omit this section if only one repo changed.
+- **Omit Empty Sections**: If a section has no points or content (e.g. Decisions made, Bugs found while testing, Notes, Next steps), omit the entire section from the final file instead of writing "None." or leaving blank headers.
 - **Intentional Exclusions**: Anything left out on purpose must be explicitly stated in bold with the reason.
 - **Pre-existing Bugs**: Flag pre-existing bugs found during testing without attempting to fix them in this PR.
 
@@ -42,9 +40,6 @@ Each generated `PR-<repo>.md` must follow this exact template structure:
 
 ```markdown
 # <YYYY-MM-DD> - <short-slug> (<repo side, e.g. frontend or backend>)
-
-<!-- COMPANION PR block (only if multiple repos changed. Omit entirely if single repo) -->
-**Companion PR**: `<other repo name>` - `<other PR link>` (<one line description of what the other side does>). <Merge order and risk if reversed.>
 
 ## Summary
 <2-3 plain sentences explaining what was missing/broken before, what this PR changes for this specific repo, and what cases were verified live.>

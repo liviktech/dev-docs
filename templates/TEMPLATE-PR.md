@@ -2,16 +2,13 @@
 TEMPLATE for a PR description. This template is per-repository.
 Copy it into the task folder and rename it per repo as PR-<short repo name>.md (e.g. PR-frontend.md, PR-backend.md). Make one PR file per repo that changed. There are no common or combined PR files. See INSTRUCTIONS.md for rules.
 Fill in every <placeholder>.
-IMPORTANT: If any section has no points or content (e.g. Companion PR, Decisions made, Bugs found while testing, Notes, Next steps), OMIT the entire section from the final PR file instead of writing "None.".
+IMPORTANT: If any section has no points or content (e.g. Decisions made, Bugs found while testing, Notes, Next steps), OMIT the entire section from the final PR file instead of writing "None.".
 Delete all of these comment blocks before you finish. The final file should have no comments left.
 Keep the writing simple and plain. Say what is true. If you checked something live, say so. If you did not check it, say so. Do not oversell.
-Do not commit or push. This file is just written to disk. The user opens the PR. Leave PR links as <...> for the user to fill in.
+Do not commit or push. This file is just written to disk. The user opens the PR.
 -->
 
 # <YYYY-MM-DD> - <short-slug> (<repo side, for example frontend or backend>)
-
-<!-- COMPANION PR block. Only keep this if the task changes multiple repos (e.g. both frontend and backend). Omit this section entirely if there is no companion PR. -->
-**Companion PR**: `<other repo name>` - `<other PR link>` (<one line on what the other side does>). <Which one merges first and what breaks if the order is wrong.>
 
 ## Summary
 

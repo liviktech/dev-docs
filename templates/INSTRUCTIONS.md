@@ -4,7 +4,7 @@ This file explains how a task is set up, what you make at each step, and the rul
 
 ## Repos
 
-A task can change one repo or several (for example frontend and backend repos). Every PR document is created strictly for its specific repository (`PR-<repo>.md`). There are no common or combined PR files. Find out which repos a task touches from the actual changes, and give each changed repo its own short name (for example the folder name or role like frontend/backend). When a task changes more than one repo, make one PR file per changed repo (`PR-<repo>.md`). The PRs go together and depend on each other, so link them using the Companion PR section.
+A task can change one repo or several (for example frontend and backend repos). Every PR document is created strictly for its specific repository (`PR-<repo>.md`). There are no common or combined PR files. Find out which repos a task touches from the actual changes, and give each changed repo its own short name (for example the folder name or role like frontend/backend). When a task changes more than one repo, make one PR file per changed repo (`PR-<repo>.md`).
 
 ## Folder layout - one folder per task
 
@@ -39,7 +39,7 @@ There is one PR template, `TEMPLATE-PR.md`. Every PR file is created strictly fo
 
 In each copy, fill in the title line with today's date, the slug, and that repo's role (for example frontend, backend, api, worker). Fill the rest from that repo's own diff and its own test run. Each PR file is about one repo only.
 
-If any section has no points or content (such as Companion PR, Decisions made, Bugs found while testing, Notes, or Next steps), omit that section entirely from the PR file. Do not write "None." or leave empty section headers.
+If any section has no points or content (such as Decisions made, Bugs found while testing, Notes, or Next steps), omit that section entirely from the PR file. Do not write "None." or leave empty section headers.
 
 ## The steps of a task
 
@@ -57,19 +57,7 @@ Do not make the PR files on your own. When the task is done the user will ask fo
 
 - Make one `PR-<repo>.md` from `TEMPLATE-PR.md` for each repo that changed (for example `PR-frontend.md` and `PR-backend.md`).
 
-Fill them from the real diffs and the real test runs, not from what the plan hoped for. Delete every comment block from the copied templates. Replace every `<placeholder>`. If a section has no points, omit it entirely instead of writing "None.". Leave the PR link placeholders (`<... PR link>`) as they are, since the user pastes the real links when they open the PRs.
-
-## Companion PR
-
-When a task changes more than one repo, each PR file starts with a Companion PR line for each other PR it depends on, that says:
-
-- the other PR (its repo name and a link placeholder),
-- one line on what the other side does,
-- which one merges first and what breaks if the order is wrong.
-
-Work out the real dependency from the change itself. A common pattern is that the backend repo adds something new (a route, a field, a schema) and the frontend repo uses it, so the backend merges first. If there is a gap between the two deploys, say what happens in that gap and whether it degrades cleanly or breaks.
-
-If the task only changes one repo, omit the Companion PR section entirely.
+Fill them from the real diffs and the real test runs, not from what the plan hoped for. Delete every comment block from the copied templates. Replace every `<placeholder>`. If a section has no points, omit it entirely instead of writing "None.".
 
 ## Writing style for every file you make
 
