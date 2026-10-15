@@ -66,7 +66,7 @@ Pick the vendor the client approved, create the account, and put three values in
 | Setting | Value |
 |---|---|
 | `AI_PROVIDER` | `gemini` |
-| `AI_MODEL` | `gemini-3.8-flash` (or the model the client picked, spelled exactly as in AI Studio) |
+| `AI_MODEL` | `gemini-3.8-flash` (or the model the client picked, spelled exactly as in AI Studio). In our own check on one sheet, `gemini-3.5-flash` and `gemini-3.6-flash` performed well and `gemini-3.5-flash-lite` did not (see the pricing page, section 9). |
 | `GEMINI_API_KEY` | The key from AI Studio |
 | `GEMINI_THINKING_LEVEL` | Optional. `high` reads messy hand-drawn sheets much better (a few seconds and a few thousand output tokens more per photo). Leave empty for Gemini 2.5 and older. |
 

@@ -149,6 +149,17 @@ Run the tests with **Read again** (`force=true`) so a stored reading does not hi
 
 **Not filled in yet.** The only recorded run so far is the prompt refinement work on 2026-10-02: nine difficult sample sheets read as expected on repeat runs with `gemini-3.5-flash-lite` and thinking set to `high`. That was a quality check of the instruction, not a scored comparison between vendors. Details are in `dev-docs/toughened-glass/tasks/feat-ai-image-extraction/2026-10-02-prompt-refinement/PR-backend.md`.
 
+**Early model check on 2026-10-15 (Gemini only, one sheet, four reads).** One photo (a door with a transom and two fixed panels, sheet total 4) was read four times. All reads found the same 4 panes with the same sizes. The cutout counts differed:
+
+| Model | Cutouts per pane (left fixed, transom, door, right fixed) | Total | Verdict |
+|---|---|---|---|
+| `gemini-3.5-flash` | 4, 4, 3, 4 | 15 | Performed well |
+| `gemini-3.6-flash` | 4, 4, 3, 5 | 16 | Performed well |
+| `gemini-3.5-flash-lite` (first read) | 2, 2, 2, 2, every pane flagged | 8 | Did not perform well |
+| `gemini-3.5-flash-lite` (second read) | all blank | 0 | Did not perform well, and disagreed with its own first read |
+
+This is the team's review of one sheet, not a score against a typed answer sheet. Time and token cost were not recorded. It does not replace the vendor test in section 8. Full details are in `dev-docs/toughened-glass/tasks/feat-ai-image-extraction/2026-10-15-cutout-rule-hole-counts/PR-backend.md`.
+
 The estimated cost per photo comes from the table above. The measured cost comes from the tokens each read actually used (`input_tokens` and `output_tokens` in `order_photo_reading`). Comparing the two shows whether the 2,000 in / 1,000 out assumption holds for our sheets.
 
 | Model | Values correct | Rows missed | Extra rows | Average time per photo | Estimated cost per photo | Measured cost per photo |

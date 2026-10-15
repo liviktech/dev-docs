@@ -12,6 +12,7 @@ Customers send photos of handwritten glass orders. Staff used to type every size
 | [AI_EXTRACTION_DEVELOPER_GUIDE.md](AI_EXTRACTION_DEVELOPER_GUIDE.md) | Developers and AI agents | Data fields and database columns, the rules the app enforces, how the server and screens are built, every route, the AI instruction rules, open gaps, and how to test. |
 | [AI_EXTRACTION_SETUP.md](AI_EXTRACTION_SETUP.md) | Whoever sets up a machine or the live server | Every account, key and setting, and where each one goes. |
 | [AI_EXTRACTION_PRICING.md](AI_EXTRACTION_PRICING.md) | The client and whoever picks the vendor | The kinds of tools we looked at, the price of every vendor, and how the vendor will be chosen. |
+| [AI_EXTRACTION_PROMPT.md](AI_EXTRACTION_PROMPT.md) | Developers and anyone tuning the AI | An example of the API call sent to the AI vendor, and the exact prompt text, on its own. |
 
 Past task records for this feature are in `dev-docs/toughened-glass/tasks/feat-ai-image-extraction/`.
 

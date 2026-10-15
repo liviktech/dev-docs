@@ -230,13 +230,13 @@ Parsing, the shared schema check, the single retry and token adding all live in 
 5. **Reading JSON next to the image:** written after every read (`<photo-id>.reading.json`) so readings survive outside the database. A storage failure here only logs a warning; it never fails the read.
 6. **Five vendors ready:** Gemini, OpenAI, Anthropic, Mistral, Qwen, each with JSON output (forced schema for Gemini, OpenAI and Anthropic; plain JSON mode for Mistral and Qwen, still checked by the shared schema).
 7. **Product master in the instruction:** active products and their active sub products, held in memory for 10 minutes, so new products reach the next readings without a restart. If the query fails, the last list (or none) is used and the read still goes ahead.
-8. **Review panel:** grouped by glass, editable group names, unsure values in yellow, remarks line under each row, sticky header, total check, Read again, zoom.
+8. **Review panel:** grouped by glass, editable group names, unsure values in yellow, remarks line under each row, sticky header, total check, Read again, zoom. The line next to each glass name counts holes, centre holes and cutouts apart, for example `4 row(s) · 4 piece(s) · 2 hole(s) · 1 centre hole(s) · 3 cutout(s)`. Kinds with 0 are left out. The counts are the sum of each row's per piece count and are not multiplied by quantity.
 9. **Drafts and merge:** one draft per glass on the Products table, safe to fill again, already saved glass skipped (section 6.4).
 10. **Product match and notes:** green or amber note under Product Details, ties never guessed, never overwrites a chosen product.
 11. **Rate filled in:** the master rate is put onto every draft size row as soon as the product is known.
 12. **Save gate:** booking cannot be saved, previewed or submitted with unreviewed drafts.
 13. **Photo download cache:** each photo file is downloaded once and reused (up to 60 kept, 3 downloads at a time), thumbnails load only when scrolled into view, and photo lists stay fresh for 60 seconds, so the server's rate limit is not used up.
-14. **Products table photo column:** saved products show a Photos badge with the order's photos (view only) and "Saved" when the product came from a reviewed draft.
+14. **Products table photo column:** saved products show a Photos badge with the order's photos (view only) and "Saved" when the product came from a reviewed draft. The summary line in the "Read from photo" column uses the same separate counts, and says "no holes or cutouts found" when there are none. Both places use `countMarks()` and `describeMarks()` in `features/ai-extraction/group-rows.ts`.
 15. **Recents on the Read from photo window:** on an order booking the list under the upload boxes is titled "Recents" and shows one row of the 3 newest photos. **See more**, at the right end of the title row, opens a "Photos for this order" window with every photo the order can use. The Enquiry window keeps its full list.
 16. **Photo pane fits and scrolls:** in the Read from photo window on wide screens the photo and the rows share one fixed height (70% of the window). The photo always fits inside its pane, and zoom scrolls both ways. On narrow screens the two parts stack. The rows table has a minimum width and scrolls sideways inside its own box.
 
@@ -461,6 +461,8 @@ The same instruction goes to every vendor, so vendors can be compared fairly. It
 
 The reply is JSON only: `analysis` first, then `sheetTotal`, `productName`, and `rows` (each with `code`, `topWidth`, `bottomWidth`, `leftLength`, `rightLength`, `unit`, `quantity`, `glassType`, `thicknessMm`, `edgeWork`, `note`, `holeQty`, `centreHoleQty`, `cutoutQty`, `unsureFields`).
 
+The exact prompt text, and an example of the API call it is sent in, are in [AI_EXTRACTION_PROMPT.md](AI_EXTRACTION_PROMPT.md).
+
 Key rules in the instruction:
 
 - **Analysis first.** The model walks through the sheet in words before the rows: orientation, every glass description and which pieces it covers, every struck through item, each piece with each mark and why it was judged a hole or cutout (walking all four borders), then total checks. Small models get hole versus cutout and merge versus split wrong when they answer straight away. The analysis is only logged at debug level, never stored or shown.
@@ -475,6 +477,7 @@ Key rules in the instruction:
 - **Pieces.** A line from edge to edge splits a drawing into pieces; a line ending at a dot is a dimension line. An outline drawn inside a pane (a door leaf) is an extra piece. Pane sizes add up to the overall; a missing pane is worked out, flagged, and explained in `note`.
 - **Quantity and merging.** Rows merge only when size, thickness, glass type, edge work, number of holes, number of cutouts and their positions all match. Never the same piece twice.
 - **Hole or cutout, the border test.** Part of a shape with the glass border as its missing side is a cutout. A complete closed shape fully inside is a hole, even near an edge. An X inside is a hole, flagged. A closed box inside is a square hole, flagged. A mark on the line shared by two panes is a cutout in each pane. Dimension lines and arrows are never marks. When unsure about an interior mark: hole, flagged.
+- **Glasses meeting the ground, ceiling or roof.** When two or more glasses meet each other and the edge of a glass at that meeting touches the ground, the ceiling or the roof, that glass has a cutout there. It is counted in each glass that reaches it, not once for the pair. A glass that stands alone on the floor does not get one from this rule. If no mark is drawn but the situation is clear, the cutout is still counted, `cutoutQty` is flagged in `unsureFields`, and `note` says it comes from this rule. The analysis step also asks the model to say, for every joint, whether it reaches the ground, ceiling or roof.
 - **Corners.** Arcs at corners mean rounded corners, counted only on corners that visibly carry a mark.
 - **Counts are per single piece.** Null when the sheet is silent, 0 only when it says none.
 - **`note` and `unsureFields` are the escape hatches.** Anything seen but not classifiable goes in `note` as written. Anything shaky is flagged, because a flagged field gets reviewed and an unflagged wrong one does not.
@@ -507,6 +510,7 @@ The original plan files in `toughened-glass/ai-extraction-plans/` are older than
 12. **Not tested yet (from the prompt refinement PR):** a read with `GEMINI_THINKING_LEVEL` empty, a read while the product list query fails, and a read on a non Gemini vendor with the `analysis` field and the four side fields. The Gemini read and the review dialog were checked live in a browser on 2026-10-08.
 13. **Photos uploaded before the rotate step cannot be turned.** A stored photo is fixed bytes, and turning it would make a new image. If an old enquiry photo is sideways it has to be uploaded again. Old photos also keep their old reading until **Read again** is used.
 14. **Migrations cannot be replayed on an empty database.** Running `npm run migrate` on a new empty database fails at `030_inventory_schema.sql` (it needs `public.work_order`, which does not exist yet at that point). It works on a database that already has the older tables. Found on 2026-10-08 and not fixed.
+15. **Which Gemini model to use (checked 2026-10-15, one sheet, four reads).** `gemini-3.5-flash` (15 cutouts in total) and `gemini-3.6-flash` (16) performed well and found the same 4 panes with the same sizes. `gemini-3.5-flash-lite` did not: its two reads disagreed (8 cutouts with every pane flagged, then every cutout count blank). It is one sheet judged by the team, not a scored comparison, and the stored reading files do not record the prompt text, tokens or time. Full table in `dev-docs/toughened-glass/tasks/feat-ai-image-extraction/2026-10-15-cutout-rule-hole-counts/PR-backend.md`. The model name is `AI_MODEL` in the backend `.env`.
 
 ---
 
@@ -534,6 +538,9 @@ The original plan files in `toughened-glass/ai-extraction-plans/` are older than
 - **No auto read:** open or reload a booking with unread photos. No rows appear and no call to `/readings` is made.
 - **Download cache:** reopen the dialog several times. No new `/file` requests; never more than 3 in flight; off screen thumbnails not requested.
 - **Bad photo:** a blurry or wrong photo (a selfie) gives a clear message or an empty result, not a crash.
+- **Counts apart:** read a sheet with holes, centre holes and cutouts. The line next to the glass name and the "Read from photo" column on the Products table show each kind separately, and a group with none shows "no holes or cutouts found" on the Products table.
+- **Ground, ceiling and roof rule:** read a sheet where two glasses meet and reach the floor. Each of those glasses gets a cutout, a lone glass on the floor gets none from this rule, and an undrawn cutout is flagged in `unsureFields` with a `note`.
+- **Model check:** read the same sheet on `gemini-3.5-flash`, `gemini-3.6-flash` and `gemini-3.5-flash-lite` with **Read again**, and compare panes by size (the model may list them in a different order).
 - **Rotate step:** choose a photo, turn it right, check the preview turned, click **Use this photo**. The stored file has the turned size (a 720x1280 photo is saved as 1280x720). **Choose another** uploads nothing.
 - **Four sides:** read a sheet where the top and bottom (or left and right) figures differ. Each side keeps its own figure in the review table and in the Add Product form. A plain rectangle gives equal pairs. Overall size is the larger of each pair.
 - **Inch sheets:** each of the four fields shows its own original value under it (for example "36.25 in").

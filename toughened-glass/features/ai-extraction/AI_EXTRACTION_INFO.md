@@ -42,7 +42,7 @@ Think of it as a fast junior clerk who reads the customer's handwritten sheet an
 
 1. **The photo:** The original sheet, shown beside what was read so staff can compare line by line.
 2. **Groups by glass:** One sheet often covers more than one glass (for example "5mm Clear Glass" and "5mm Frosted Glass"). Each glass gets its own group, and each group becomes its own product on the booking.
-3. **Rows:** One row per kind of piece: code (W1, W16...), the four sides (top width, bottom width, left length, right length), quantity, thickness, edge work, holes, centre holes, cutouts. Long notes (like hole sizes and positions) show on a "Remarks" line under the row.
+3. **Rows:** One row per kind of piece: code (W1, W16...), the four sides (top width, bottom width, left length, right length), quantity, thickness, edge work, holes, centre holes, cutouts. Long notes (like hole sizes and positions) show on a "Remarks" line under the row. The line next to the glass name counts holes, centre holes and cutouts separately, for example "2 hole(s), 1 centre hole(s), 3 cutout(s)".
 4. **Yellow boxes:** Values the AI was not sure about. Staff must look at these. Once staff edit a value, it is no longer marked unsure.
 5. **Total check:** If the sheet has a total written on it and the rows do not add up to it, a warning is shown.
 6. **Read again:** Sends the photo to the AI one more time (this costs money) instead of reusing the earlier result. Use it when a reading looks wrong.
