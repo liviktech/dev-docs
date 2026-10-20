@@ -8,7 +8,7 @@ This PR adds the screens for a batch of production and dispatch changes. The sta
 ## What changed
 | File | Change |
 |---|---|
-| `src/features/production-scan/components/downtime-dialog.tsx` (new) | The Downtime dialog for the current stage: list the stage's downtimes, add one (start, optional end, reason) and fill in an end time later. |
+| `src/features/production-scan/components/downtime-dialog.tsx` (new) | The Downtime dialog for the current stage: list the stage's downtimes, add one (start, optional end, reason) and fill in an end time later. Start and End are stacked, each using the existing `DatePicker` (same calendar as the rest of the site) plus typed hour and minute boxes and an AM / PM toggle (12 hour time). End has a Clear link. The value stays `YYYY-MM-DDTHH:mm` in 24 hour form, so nothing changes for the API. No new shared component was added. |
 | `src/features/production-scan/components/work-order-progress.tsx` (new) | The Progress cell (single line bar, stages done and percent, clickable look with a chevron) and the dialog that opens from it with each product's stages, pieces done, bar and status. Used by both Work Orders and PI Status. |
 | `src/features/production-scan/scan-detail-page.tsx` | Added the Downtime button (shows a red dot when a downtime is still open) and mounts the dialog. |
 | `src/features/production-scan/components/stage-work-panel.tsx` | The Complete button is disabled, with a tooltip, while the stage has a downtime with no end time. |
@@ -88,7 +88,7 @@ The shop floor needs to record machine breakdowns, and to be stopped from comple
 ## Test plan
 **Automated tests (all passing):**
 - [x] `npm run build`: build succeeded (before the Transporter Name removal).
-- [x] `tsc --noEmit -p tsconfig.app.json`: no errors after the Transporter Name removal.
+- [x] `tsc --noEmit -p tsconfig.app.json`: no errors after the Transporter Name removal and the Downtime dialog date and time change.
 - [ ] No frontend unit tests were added or run for these screens.
 
 **Manual checks (local):**
