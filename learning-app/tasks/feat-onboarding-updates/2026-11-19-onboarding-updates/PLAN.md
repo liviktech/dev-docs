@@ -3,6 +3,12 @@
 Date: 2026-11-19
 Apps: Mobile app (`D:\lm`) and Backend (`learning-app-backend`)
 
+## Status (2026-11-19): implemented
+
+- Done: migrations 0008 and 0009, the `student` backend module, integration tests (32 new, all pass), the mobile changes, `architecture.md` section 10d.
+- Differences from this plan: the finished-onboarding column is `users.onboarded_at` (not `onboarding_completed_at`); the seed file now sets the exam score range; the exam list shows the exam name in front of a subject label (for example "SAT Mathematics") when a student has both exams.
+- Not yet done: migrations are applied to the local test database only, not to the Neon dev database. The manual end-to-end checklist in section 9 still needs a run on a real device.
+
 ## 1. Goal
 
 Make the onboarding flow work for real, from the phone to the database and back:
