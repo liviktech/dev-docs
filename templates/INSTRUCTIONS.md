@@ -8,7 +8,7 @@ A task can change one repo or several (for example frontend and backend repos). 
 
 ## Folder layout - one folder per task
 
-Each branch has its own folder under `tasks/`. Inside it, the agent creates one folder per task automatically. The agent derives the folder name from today's date and a short slug based on the actual diff. The user never names the folder manually.
+Each branch has its own folder under `tasks/`. The documents for that branch (`PLAN.md`, `PR-<repo>.md`) go directly inside it. Do not create a dated or slug sub-folder. The user never names the folder manually: it is the branch name.
 
 ```
 dev-docs/
@@ -21,15 +21,14 @@ dev-docs/
   <project-name>/
     tasks/
       <branch-name>/
-        <YYYY-MM-DD-short-slug>/   <- agent names this from the date + diff
-          PLAN.md                  <- optional, make this if the work needs upfront planning
-          PR-<repo>.md             <- YOU make one of these per changed repo (e.g. PR-frontend.md, PR-backend.md)
+        PLAN.md                    <- optional, make this if the work needs upfront planning
+        PR-<repo>.md               <- YOU make one of these per changed repo (e.g. PR-frontend.md, PR-backend.md)
     features/
       <feature-name>/              <- user names this folder
         README.md                  <- main doc for the feature, or multiple files if needed
 ```
 
-The slug is 2 to 4 words in kebab-case that describe what changed (for example `user-auth`, `payment-null-fix`, `dashboard-card-redesign`). The agent picks it from reading the diff. Keep it short and honest.
+The slug used in the PR title line is 2 to 4 words in kebab-case that describe what changed (for example `user-auth`, `payment-null-fix`, `dashboard-card-redesign`). The agent picks it from reading the diff. Keep it short and honest. It is only a label in the title, not a folder name.
 
 The templates in `templates/` are the source of truth for shape and wording. Always copy from them. Do not invent a new shape.
 
@@ -47,7 +46,7 @@ If any section has no points or content (such as Decisions made, Bugs found whil
 The user describes what they are working on or points the agent at the diff. Read the actual changes across all touched repos to understand what is in scope. If there is a written brief or description, read that too.
 
 ### 2. Plan (optional, only when the user asks or the work is complex)
-If the user asks for a plan, or the work is large enough that a plan helps, create the task folder (`<branch-name>/<YYYY-MM-DD-short-slug>/`) and make `PLAN.md` inside it. The agent picks the slug from the diff. Put in the approach, the files you expect to touch in each repo, the risks and unknowns, what is out of scope on purpose, and how you will test. Keep it updated to match what really happened. If no plan is needed, skip this step and create the task folder only when making the PR files.
+If the user asks for a plan, or the work is large enough that a plan helps, make `PLAN.md` directly inside the branch folder (`tasks/<branch-name>/`). Put in the approach, the files you expect to touch in each repo, the risks and unknowns, what is out of scope on purpose, and how you will test. Keep it updated to match what really happened. If no plan is needed, skip this step and create the branch folder only when making the PR files.
 
 ### 3. Build
 Do the work. When real life differs from the plan, write it down. Those changes, and any "I tried one way then picked a safer way" moments, are what go into the PR sections "Decisions made" and "Bugs found while testing". Check things live when you claim they work. Keep a note of old bugs you run into but do not fix.

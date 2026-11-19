@@ -207,3 +207,14 @@ Both repos use the branch `feat-admin-auth`. The agent does not commit or push. 
 - **Local only for now.** The admin panel runs at `http://localhost:5173`, and that is the only origin added to CORS. There is no production URL yet. When a real https URL exists, add it to `CORS_ALLOWED_ORIGINS` (the backend rejects non-https origins in production).
 - **Phone rule is the same as mobile.** Optional, 7 to 15 digits, optional leading `+`.
 - **Password rule is the same as mobile.** 8 to 128 characters, no stricter admin rule for now.
+
+## Update 2026-11-19: one email, one admin account and one mobile account
+
+Found while testing: an admin could sign in to the mobile app, because the mobile login code never checked the role. Decision: admins use the admin panel only, students and parents use the mobile app only.
+
+- The same email may have one admin account and one mobile account. They are separate accounts with separate passwords, sessions and codes.
+- On mobile one email is either a parent or a student, never both.
+- Migration `0007_email_unique_per_audience` replaces the single unique email index with two partial unique indexes (admin, and student or parent). It is not run yet; the user applies it.
+- Every email lookup now takes an audience. Mobile endpoints only see student and parent accounts. Admin endpoints only see admin accounts. Refresh tokens of the other audience are rejected.
+- An admin who wants the mobile app signs up there as a student or parent with the same email.
+- Tests: `test/integration/auth-audience.int-spec.ts` (written, not run until the migration is applied).

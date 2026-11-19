@@ -19,8 +19,8 @@ The admin panel could only sign up, log in and show an empty dashboard. This PR 
 | `src/components/common/query-status.tsx` (new) | The loading and error state for data a page waits on. |
 | `src/assets/animations/open-book.json` (new) | The supplied Lottie animation. Only its colours were changed to the blue palette. The shapes and the page turn are the same. |
 | `src/index.css` | Palette as theme variables (page background, primary hover, teal, navy sidebar colours). |
-| `src/layouts/dashboard-layout.tsx` | Full height fixed sidebar with the branding, the menu and a book shape pinned to the bottom. New top bar with Log out and an avatar. The page area is wrapped in `Suspense` with the book loader. The content fills the width beside the sidebar. |
-| `src/routes/routes.tsx` | Pages in the signed in area load on demand through a small `page(...)` helper. Routes and paths are the same. |
+| `src/layouts/dashboard-layout.tsx` | Full height fixed sidebar with the branding, the menu and a book shape pinned to the bottom. New top bar with Log out and an avatar. The page area is wrapped in `Suspense` with the book loader, as a safety net for lazy pages. The content fills the width beside the sidebar. |
+| `src/routes/routes.tsx` | The pages for the new screens are imported directly, so the heading and filters show on the first paint. Routes and paths are the same. |
 | `src/routes/protected-route.tsx` | No longer replaces the page with a spinner while the session is checked, so the frame and the page stay on screen. The redirects and the error handling are the same. |
 | `src/pages/dashboard-page.tsx` | Keeps its heading and uses `QueryStatus` for the admin data. |
 | `src/hooks/use-debounced-value.ts` (new), `src/lib/exams.ts` (new) | A debounce hook for the search box and the exam list (SAT, ACT). |
@@ -43,7 +43,7 @@ The client's Nov 16 notes ask for question upload for SAT and ACT, one by one or
 
 **Import**: The browser reads the CSV or Excel file and sends plain JSON, so the server never parses spreadsheets. Max 500 rows, sent in chunks of 25. Step by step: pick the exam, download a template made from the real subject names, upload the file, see a table of rows with errors, then import the clean rows. Each passage is created once before the import and its id is sent with the rows. "Publish now" is a checkbox that is on by default.
 
-**Loader**: There are two ways a page gets the loader. Every page in the signed in area loads on demand and `DashboardLayout` shows the book loader while it loads. For data, a page puts `QueryStatus` where the data will appear. It shows the loader while loading, a red box on error and nothing once the data is there. A new page added with `page(...)` and `QueryStatus` gets the same loading state as the rest.
+**Loader**: A page puts `QueryStatus` where its data will appear. It shows the book loader while loading, a red box on error and nothing once the data is there. The heading and filters stay on screen, so only the table area shows the loader. A new page that uses `QueryStatus` gets the same loading state as the rest. `DashboardLayout` also keeps a `Suspense` with the book loader, so a lazy page added later gets the loader too.
 
 **Look**: The palette is set once as theme variables in `src/index.css` and the shared button, input and dropdown components read from it. Pages do not set colours themselves. Geist stayed as the font, to avoid a new dependency.
 
@@ -52,6 +52,8 @@ The client's Nov 16 notes ask for question upload for SAT and ACT, one by one or
 ## Decisions made
 
 **The panel no longer waits for the session check before showing the page.** The spinner used to hide the whole page. Now the page and its data request start together with the session check. Without a valid session the server returns an error and the user still ends up on the login page.
+
+**Pages are not lazy loaded.** They were lazy loaded at first, but after a reload the whole content area (heading and filters too) was replaced by the loader until the page file arrived, which looked like a blank flash. Importing the pages directly shows the heading at once. The app is small, so the bundle cost is low.
 
 **The loader recolour is a change to the supplied file.** The animation was near black. It is now royal blue with light blue page lines, to match the palette. Nothing was redrawn.
 
@@ -90,4 +92,4 @@ The client's Nov 16 notes ask for question upload for SAT and ACT, one by one or
 - [x] Looked at screenshots of the Questions and Subjects pages after the restyle, the dropdown fix, the content width fix and the loader. The loader appeared on Questions and the grey placeholder on Subjects, which was then replaced.
 - [ ] Subjects arrows, rename and delete after the CORS fix - not checked, because the backend needs a restart and the test admin is pending approval.
 - [ ] Question form, list and CSV and Excel import against the real backend - not checked, because the migration and seed have not been run.
-- [ ] The loader on every page after the last change (page loading on demand and `QueryStatus`) - not checked in a browser. Typecheck and the unit tests cover it.
+- [ ] The loader on every page after the last change (pages imported directly and `QueryStatus`, which also removes the short blank flash after a reload) - not checked in a browser. Typecheck and the unit tests cover it.
