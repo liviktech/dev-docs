@@ -4,9 +4,11 @@
 
 A FIR could only be a plain complaint. There was no way to fix the glass from it. This PR adds a second FIR kind, Rework / Replacement. Saving one creates Replace Orders (RO), one per resolution type. An RO is a work order with `order_type = 'RO'` that is worked on the shop floor, then dispatched through the normal dispatch and gate pass flow with no PI, no final invoice and no e-way bill. The FIR status follows its ROs on its own (OPEN, IN_PROGRESS, RESOLVED, CLOSED).
 
+Each piece also carries its own configuration (size, glass, holes, cutouts, extra label). The faulty glass is saved in inventory as party material, and a rework takes its glass from that lot when its RO is approved.
+
 Company fault records a fixed 50% penalty. Client fault records a typed charge. Both are records only, nothing is deducted or invoiced.
 
-**The new SQL has not been run against a database.** Migration 166 is not run yet, so every new query is untested live. This was a choice, the user runs migrations.
+**The new SQL has not been run against a database.** Migrations 166 and 168 are not run yet, so every new query is untested live. This was a choice, the user runs migrations.
 
 ## What changed
 
@@ -26,6 +28,13 @@ Company fault records a fixed 50% penalty. Client fault records a typed charge. 
 | `src/modules/dispatch/dispatch-progress.ts`, `dispatch-shipment.repository.ts`, `dispatch-shipment.service.ts` | RO handling in the progress and shipment steps. |
 | `src/modules/production-scan/production-scan.repository.ts` | Scan flow works for RO pieces. |
 | `src/modules/report/fir/*`, `src/modules/report/order-status/order-status-report.repository.ts`, `src/modules/report/sales-rep/sales-rep-report.repository.ts` | The FIR report knows the new kind. The other reports leave ROs out so they only count real work orders. |
+| `src/database/migrations/168_fir_item_config_party_lot.sql` (new) | Piece configuration columns on `sales.fir_item` and the party lot link. `source_fir_id` on `public.inventory_lot`. |
+| `src/modules/fir/fir-config.ts` (new) | Pure rules: hole work, the route of a piece, what a replacement is made as. |
+| `src/modules/fir/fir-party-lot.ts` (new) | Creates the party material lots on save, issues a rework's sheets at approval, empties the lots on cancel. |
+| `src/modules/fir/fir-ro.service.ts`, `fir-ro.repository.ts`, `fir.schema.ts`, `fir.types.ts` | Piece `config` in and out. Lots created on save. Cancel returns stock. |
+| `src/modules/work-order/work-order-inventory.service.ts`, `work-order-stock.service.ts`, `replace-order.repository.ts` | A rework RO issues from its party lot, not stock. A replacement uses the typed glass and size. Rework pieces are no longer listed in the lot picker. |
+| `src/modules/work-order/work-order.repository.ts`, `replace-order-detail.repository.ts`, `src/modules/production-scan/*` | An RO piece shows its own size and hole counts. |
+| `tests/fir-piece-config.test.ts` (new) | Tests for the route, replacement spec, lot grouping and config input. |
 | `tests/fir-rework-replacement.test.ts` (new) | Tests for penalty, numbering, status, readiness and input rules. |
 | `tests/fir-route-rights.test.ts`, `tests/work-order-route-rights.test.ts` | Added the new routes to the rights lists. No other change. |
 
@@ -39,7 +48,13 @@ The business needed a clean way to fix faulty glass from a complaint, with the c
 
 **One RO per type**: on save, rework pieces go to one RO and replacement pieces to another. Each starts as DRAFT and points at the original work order and the FIR.
 
-**Rework vs replacement**: a rework keeps the original barcode, runs only the chosen stages, and takes no stock. A replacement gets a `-R<n>` barcode, the full route, and its glass lot is chosen in the normal approve work order step.
+**Rework vs replacement**: a rework keeps the original barcode, runs only the chosen stages, and takes its glass from the FIR party lot. A replacement gets a `-R<n>` barcode, the full route, and its glass lot is chosen in the normal approve work order step.
+
+**Piece configuration**: a rework keeps its glass and size and can ask for extra holes, cutouts and a label. A replacement can change size, glass type, thickness and colour. Any hole or cutout adds the Fabrication stage (found by name) after Grinding, else after Cutting, else first. Extra label is a flag only.
+
+**Party material**: on save, pieces are grouped by glass, thickness, colour and size. Each group becomes one lot (one sheet per piece) that holds the FIR number and the reasons. A group is one lot, not one lot per FIR, because a lot can describe only one size. Pieces with no recorded size get no lot.
+
+**Stock movement**: approving a rework RO takes one sheet per piece from its lot (an area movement, so rejecting the RO puts it back). Cancelling a FIR returns what its ROs took and sets its lots to zero.
 
 **Ready to approve**: an RO shipment is ready when its pieces are live, not rejected, and every stage is completed or skipped. There is no invoice check.
 
@@ -57,7 +72,7 @@ The business needed a clean way to fix faulty glass from a complaint, with the c
 
 ## Notes
 
-- Migration 166 is append-only and safe to re-run, but it was not run here.
+- Migrations 166 and 168 are append-only and safe to re-run, but it was not run here.
 - The Approve Dispatch dialog on an RO shipment may still ask for invoice or e-way bill fields. Not checked.
 - A rework's last stage scan may add stock a second time. Not checked, flagged for review.
 
