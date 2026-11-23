@@ -6,7 +6,7 @@ The admin panel could not attach images to questions, and had no read only page 
 
 Checked live: unit tests pass (89 of 89 across 12 files) and typecheck shows no errors. The single image upload was tried in the browser against a real S3 bucket and reached the upload and confirm steps. The bulk paths, the ZIP path and the detail page were not tried in a browser or against real S3.
 
-**Student web and mobile display is not included on purpose** - see "Next steps" below. This was a choice, not a miss.
+Student web and mobile display is not part of this admin PR. It is in the backend and web PRs.
 
 ## What changed
 
@@ -28,6 +28,8 @@ Checked live: unit tests pass (89 of 89 across 12 files) and typecheck shows no 
 | `src/features/content/lib/bulk-images.ts`, `bulk-images.test.ts` (new) | Checks before upload: missing, unused, duplicate, wrong-case, wrong-type and too-big files. Uploads 5 at a time with 3 tries each. |
 | `src/features/content/lib/zip-images.ts`, `zip-images.test.ts` (new) | Unzips in the browser with `fflate`. Limits: ZIP 100 MB, 1000 entries, 250 MB unzipped. Skips `__MACOSX` and rejects unsafe paths and duplicate names. |
 | `src/features/content/pages/import-page.tsx` | Multi file picker and ZIP picker. Uploads images only for rows that passed the check, then sends the rows with image ids. Each created row links to its detail page. |
+| `src/features/content/components/question-form.tsx` (second change) | The Publish button was a submit button whose handler published only when the question was already published, so Publish on a new or draft question saved a draft. It is now a normal button that publishes. Pressing Enter in a text box no longer saves anything. |
+| `src/features/content/pages/import-page.tsx` (second change) | Fast import ran when the CSV was chosen, before any images were chosen, so every image row failed with "image was not selected" and adding the images later did not check again. Fast import now runs only when no image is missing. Otherwise the file is checked first and checked again when images or the ZIP are added. |
 | `src/components/common/file-input.tsx` | Supports picking several files. |
 | `package.json`, `package-lock.json` | Adds `fflate`. |
 
@@ -65,7 +67,6 @@ Admins need to add diagrams and graphs to SAT and ACT questions one by one or in
 
 ## Next steps
 
-- Show the images in the student web and mobile apps (Phase 6). The backend student endpoints need to return images first.
 - Make alt text editable after upload.
 - Add uploaders for passage images.
 - Decide which bulk path is the default in the admin panel. ZIP is suggested for larger batches.
@@ -81,7 +82,11 @@ Admins need to add diagrams and graphs to SAT and ACT questions one by one or in
 - [x] `npx tsc --noEmit -p tsconfig.app.json`: no errors
 - [ ] `npm run lint`: not run in this session
 
+No test was added for the Publish button fix or the import re-check fix.
+
 **Manual checks (local):**
+- [ ] Publish on a new question saves it as published - not run in a browser, fixed by reading the code
+- [ ] CSV plus ZIP import no longer reports "image was not selected" - not run in a browser
 - [x] Add image on a question in the browser, against a real S3 bucket: the upload and confirm calls succeeded and the image row appeared in the form
 - [ ] The thumbnail loading after the upload - not working yet, the bucket is private and returned 403 on the image URL
 - [ ] Bulk import with several images and with a ZIP - not run

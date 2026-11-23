@@ -4,7 +4,7 @@
 
 Questions could not have images. The tables for images existed from migration `0001`, but no code used them. This PR adds an admin only `media` module that lets the browser upload an image straight to S3, checks the stored file, and links confirmed images to a question's stem, each option and the explanation. The admin question detail now returns those images.
 
-The student endpoints (practice and mock exams) are **not changed**. They still return no images. That is Phase 6 and is described in `IMPLEMENTATION-AND-PHASE-6.md`.
+The student endpoints (practice and mock exams) now return the images too, as public URLs, so the mobile and web apps can show them. Explanation images are held back until the student has answered (practice) or the exam is reviewed (mock exam).
 
 Checked live: the upload reached a real S3 bucket from the admin page. The presign call returned 201 and the browser upload and the confirm call were seen working after the bucket CORS and IAM policy were fixed. The question save with images and the detail response were not checked against real S3. Everything else is covered by unit and integration tests only.
 
@@ -22,6 +22,12 @@ Checked live: the upload reached a real S3 bucket from the admin page. The presi
 | `src/modules/questions/schemas/question-response.schemas.ts`, `interfaces/question.interfaces.ts` | The detail returns `stemImages`, `explanationImages` and `options[].images`. List rows return an image count. |
 | `src/modules/questions/repositories/questions.repository.ts` | Links assets when a revision is written. Reads images for the detail. Checks the assets exist, are confirmed and are not used by another question. |
 | `src/modules/questions/questions.service.ts`, `bulk-questions.service.ts`, `questions.module.ts` | Pass image ids through create, update and bulk import. The module imports `MediaModule`. |
+| `src/modules/media/question-images.service.ts` (new) | Reads the confirmed images of a set of questions in one query and returns them by stem, explanation, option and passage, with the public URL built from the stored key. |
+| `src/modules/media/repositories/media.repository.ts`, `interfaces/media.interfaces.ts`, `schemas/media-response.schemas.ts`, `media.module.ts` | `findQuestionImages()` joins the revision, option and passage link tables to confirmed assets. New `PublicImage` type and schema (`id`, `url`, `width`, `height`, `altText`). The module exports the new service. |
+| `src/modules/practice/` (service, repository, interfaces, `schemas/practice-response.schemas.ts`, module) | Session questions return `stemImages`, `passageImages` and `options[].images`. Answer feedback and the answered question return `explanationImages`. An unanswered question never carries explanation images. |
+| `src/modules/mock-exams/` (service, repository, interfaces, `schemas/mock-exam-response.schemas.ts`, module) | Exam questions return `stemImages`, `passageImages` and `options[].images`. The review also returns `explanationImages`. |
+| `src/modules/study-plan/` (service, repository, module) | Modified together with the media changes. No image field added here. |
+| `test/integration/image-fixtures.ts` (new), `test/integration/practice.int-spec.ts`, `test/integration/mock-exams.int-spec.ts`, `test/unit/practice.spec.ts` | Helpers to insert images, and new cases for the student endpoints. |
 | `package.json`, `package-lock.json` | Adds `@aws-sdk/client-s3` and `@aws-sdk/s3-presigned-post`. |
 | `.env.example` | Documents the new variables. |
 | `architecture.md` | Section 10c and the media configuration are updated. |
@@ -43,7 +49,9 @@ Admins need to attach diagrams and graphs to SAT and ACT questions, and the web 
 
 **AWS credentials**: if `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` are set, they are passed to the S3 client. If not, the client uses the AWS default lookup (an IAM role in production). They have to be declared in the env schema because `ConfigModule` only copies declared keys into `process.env`. Before this was fixed, the keys in `.env` never reached the SDK and the presign call failed with `CredentialsProviderError`.
 
-**Kept the same on purpose**: student endpoints, their response schemas and the existing `media_assets` and link tables. No new table was added.
+**Student endpoints**: practice and mock exam load the images of all returned questions with one query (`QuestionImagesService.load`), not one per question. Only `confirmed` images are returned. Explanation images are added only after an answer is saved (practice) or in the review (mock exam), so a student cannot see them before answering.
+
+**Kept the same on purpose**: the existing `media_assets` and link tables. No new table was added. The new image fields are additions, so the existing fields of the student responses did not change.
 
 ## Decisions made
 
@@ -53,7 +61,7 @@ Admins need to attach diagrams and graphs to SAT and ACT questions, and the web 
 
 **No S3 resizing yet.** The plan has a Lambda that makes WebP and smaller sizes. It is not built, so the original file is served.
 
-**Passage images are not wired.** The plan only listed the stem, option and explanation.
+**Passage images are returned but cannot be uploaded yet.** The student endpoints return `passageImages` from the passage link table. The admin has no passage uploader, so the list stays empty until one is added.
 
 ## Bugs found while testing (already there before, not fixed here)
 
@@ -70,10 +78,9 @@ Admins need to attach diagrams and graphs to SAT and ACT questions, and the web 
 
 ## Next steps
 
-- Add images to the student practice and mock exam endpoints (Phase 6).
 - A cleanup job for confirmed images that nothing uses. Unused images stay in S3 today.
 - Allow alt text to be edited after upload.
-- Wire passage images.
+- Add a passage image uploader in the admin.
 - Optional Lambda for WebP and thumbnail sizes.
 
 ## Test plan
@@ -83,6 +90,8 @@ Admins need to attach diagrams and graphs to SAT and ACT questions, and the web 
 - [x] `test/unit/media.spec.ts`: presign request schema, storage env rules, blank values, AWS keys kept and required together (15 passing)
 - [x] `test/unit/question-upload.spec.ts`: image id limits per slot
 - [x] `test/integration/question-upload.int-spec.ts`: create, edit and detail with images, and the asset rules. Last run before the credentials fix. Not re-run this session.
+- [x] `test/integration/practice.int-spec.ts`: stem and option images come as public URLs, explanation images are hidden until answered, unconfirmed uploads are left out, and questions without images get empty lists. Not re-run in this session.
+- [x] `test/integration/mock-exams.int-spec.ts`: images show during the exam, explanation images only in the review. Not re-run in this session.
 - [x] `npm run typecheck`: passes
 - [ ] `npm run lint`: not run, blocked by Application Control on this machine
 - [ ] `test/unit/otp.service.spec.ts`: still failing, not part of this work
