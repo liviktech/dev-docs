@@ -14,9 +14,8 @@ Use this skill whenever asked to generate PR documentation, create PR md files, 
 - Read actual diffs across all touched repositories (frontend, backend, etc.) to understand the full scope of changes.
 
 ### 2. Folder & File Structure
-- Create a folder under: `<project-name>/tasks/<branch-name>/<YYYY-MM-DD-short-slug>/`
-  - `YYYY-MM-DD`: Current date.
-  - `short-slug`: 2 to 4 kebab-case words derived from the diff (e.g., `user-auth-flow`, `payment-null-check`).
+- Create the files directly under: `<project-name>/tasks/<branch-name>/` (no dated or slug sub-folder).
+  - In the PR title line, use today's date and a `short-slug` of 2 to 4 kebab-case words derived from the diff (e.g., `user-auth-flow`, `payment-null-check`).
 - Make **one PR file per changed repository**, named `PR-<short repo name>.md` (e.g., `PR-frontend.md` and `PR-backend.md`).
 - Do **not** create any common or combined `PR.md` file. Every PR document is strictly per-repository.
 
