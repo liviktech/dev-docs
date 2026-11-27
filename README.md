@@ -22,9 +22,8 @@ dev-docs/
       <feature-name>/          <- Feature documentation (business & developer guides)
     tasks/
       <branch-name>/
-        <YYYY-MM-DD-slug>/     <- Task folder created per branch/task
-          PLAN.md              <- Optional task plan
-          PR-<repo>.md         <- One PR doc per changed repo (e.g. PR-frontend.md, PR-backend.md)
+        PLAN.md                <- Optional task plan
+        PR-<repo>.md           <- One PR doc per changed repo (e.g. PR-frontend.md, PR-backend.md)
 ```
 
 ---
@@ -60,7 +59,7 @@ The reusable Claude Agent Skill definition that automates reading diffs and gene
 5. A short `README.md` in the feature folder can point readers to the right file and give the current status.
 
 ### Documenting a Task or Pull Request
-1. Create a task directory under `<project-name>/tasks/<branch-name>/<YYYY-MM-DD-short-slug>/`.
+1. Create the branch directory `<project-name>/tasks/<branch-name>/` (no dated sub-folder).
 2. If the work requires upfront planning, create `PLAN.md`.
 3. When the work is done and the user asks for the PR docs, create one `PR-<repo>.md` per changed repo using [`TEMPLATE-PR.md`](templates/TEMPLATE-PR.md).
 
